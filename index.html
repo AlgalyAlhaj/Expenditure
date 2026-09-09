@@ -245,10 +245,26 @@
     font-size:12px; color:var(--ink-soft); opacity:.75;
   }
 
+  @page{ size: A4; margin: 12mm 11mm; }
   @media print{
-    body{background:#fff; padding:0;}
-    .toolbar, footer.hint{display:none;}
-    .sheet{box-shadow:none;}
+    html,body{background:#fff; padding:0; margin:0;}
+    .toolbar, footer.hint{display:none !important;}
+    .sheet{
+      box-shadow:none;
+      max-width:100%;
+      margin:0;
+      padding:0;
+    }
+    .sheet::before{display:none;}
+    header.letterhead, section.meta, .words-line, tfoot{
+      break-inside:avoid; page-break-inside:avoid;
+    }
+    table.items{ break-inside:auto; }
+    table.items thead{ display:table-header-group; }
+    table.items tfoot{ display:table-footer-group; }
+    table.items tbody tr{ break-inside:avoid; page-break-inside:avoid; }
+    table.items th, table.items td{ padding:6px 8px; }
+    .no-print{ display:none !important; }
   }
 
   @media (max-width: 640px){
@@ -269,6 +285,7 @@
     <button id="btnNew">قائمة جديدة</button>
     <span class="spacer"></span>
     <span class="status" id="statusText">يُحفظ تلقائياً في هذا المتصفح</span>
+    <button id="btnPrint">🖨️ طباعة</button>
     <button id="btnPdf" class="primary">⭳ حفظ PDF</button>
   </div>
 
@@ -320,9 +337,8 @@
     <p class="words-line">((<span id="wordsText" contenteditable="true" class="words-editable"></span>))</p>
   </div>
 
-  <footer class="hint no-print">التاريخ ورقم القائمة والبنود قابلة للتعديل مباشرة على الصفحة. الإجمالي يُحسب تلقائياً ويمكن كتابته يدوياً عند الحاجة.</footer>
+  <footer class="hint no-print">التاريخ ورقم القائمة والبنود قابلة للتعديل مباشرة على الصفحة. الإجمالي يُحسب تلقائياً ويمكن كتابته يدوياً عند الحاجة. لحفظ الملف كـ PDF: اضغط "حفظ PDF" ثم اختر "Save as PDF" / "حفظ بصيغة PDF" من قائمة الطابعة في نافذة الطباعة.</footer>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -532,23 +548,26 @@
     saveState();
   });
 
-  document.getElementById('btnPdf').addEventListener('click', function(){
-    var sheet = document.getElementById('sheet');
+  function setPrintTitle(){
+    // the browser's print dialog / "Save as PDF" uses document.title as the default filename
     var listNo = document.getElementById('listNumber').value.trim();
-    var dateVal = dateInput.value.replace(/[^\d]/g,'-').replace(/^-|-$/g,'');
-    var filename = 'قائمة_صرف' + (listNo ? ('_'+listNo) : '') + (dateVal ? ('_'+dateVal) : '') + '.pdf';
-    var opt = {
-      margin: 0,
-      filename: filename,
-      image: { type:'jpeg', quality:0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        ignoreElements: function(el){ return el.classList && el.classList.contains('no-print'); }
-      },
-      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
-    };
-    html2pdf().set(opt).from(sheet).save();
+    var dateVal = dateInput.value.trim();
+    var name = 'قائمة صرف';
+    if(listNo) name += ' ' + listNo;
+    if(dateVal) name += ' - ' + dateVal;
+    document.title = name;
+  }
+
+  function openPrintDialog(){
+    setPrintTitle();
+    window.print();
+  }
+
+  document.getElementById('btnPrint').addEventListener('click', openPrintDialog);
+  document.getElementById('btnPdf').addEventListener('click', openPrintDialog);
+
+  window.addEventListener('afterprint', function(){
+    document.title = 'قائمة صرف - الغالي الحاج لخدمات التخليص والترحيل';
   });
 
   /* ---------------- persistence ---------------- */
