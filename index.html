@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قائمة صرف - الغالي الحاج لخدمات التخليص والترحيل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1D2B39;
+    --ink-soft:#3C4A57;
+    --paper:#F7F2E6;
+    --paper-edge:#EFE7D4;
+    --line:#DACFAF;
+    --stamp:#9C2B2B;
+    --stamp-soft:#C1554F;
+    --brass:#A9822F;
+    --muted:#7A7160;
+    --ok-bg:#EFE9D6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, #EDE3C8 0%, transparent 45%),
+      radial-gradient(circle at 88% 92%, #E6DAB9 0%, transparent 40%),
+      #DED2AE;
+    min-height:100vh;
+    font-family:'IBM Plex Sans Arabic', sans-serif;
+    color:var(--ink);
+    padding:28px 16px 60px;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    max-width:900px;
+    margin:0 auto 18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+  .toolbar button{
+    font-family:inherit;
+    font-size:14px;
+    font-weight:600;
+    border:1.5px solid var(--ink);
+    background:#FBF8EF;
+    color:var(--ink);
+    padding:9px 16px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .toolbar button:hover{background:#fff;}
+  .toolbar button:active{transform:translateY(1px);}
+  .toolbar button.primary{
+    background:var(--stamp);
+    border-color:var(--stamp);
+    color:#FBF3ED;
+  }
+  .toolbar button.primary:hover{background:var(--stamp-soft);}
+  .toolbar .spacer{flex:1;}
+  .toolbar .status{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    background:#FBF8EF;
+    border:1px dashed var(--line);
+    padding:6px 10px;
+    border-radius:3px;
+  }
+
+  /* ---------- Sheet ---------- */
+  .sheet{
+    max-width:900px;
+    margin:0 auto;
+    background:var(--paper);
+    box-shadow:0 1px 0 var(--paper-edge), 0 18px 40px -20px rgba(29,43,57,.55), 0 2px 8px rgba(29,43,57,.12);
+    padding:44px 48px 52px;
+    position:relative;
+  }
+  .sheet::before{
+    content:"";
+    position:absolute;
+    inset:10px;
+    border:1px solid var(--paper-edge);
+    pointer-events:none;
+  }
+
+  header.letterhead{text-align:center;}
+  .bismillah{
+    font-family:'Amiri', serif;
+    font-style:italic;
+    font-size:17px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  header.letterhead h1{
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size:26px;
+    margin:0 0 8px;
+    color:var(--stamp);
+    letter-spacing:.3px;
+  }
+  .addr{margin:2px 0; font-size:14px; color:var(--ink-soft);}
+  .phones{margin:2px 0 8px; font-size:14px; font-weight:600; color:var(--ink);}
+  .email{margin:0; font-size:13.5px; color:var(--muted); direction:ltr; display:inline-block;}
+  .email strong{color:var(--brass); font-weight:600;}
+
+  .rule{height:6px; margin:18px 0 22px; border-top:3px solid var(--ink); border-bottom:1px solid var(--ink);}
+
+  section.meta{font-size:15px; line-height:1.9;}
+  .meta-row{margin-bottom:14px; text-decoration:underline; text-decoration-color:var(--line);}
+  .meta-row label{font-weight:700;}
+  .salute{font-weight:700; font-size:16px; margin:4px 0 2px;}
+  .honor{font-weight:700; margin:0 0 10px; padding-right:2px;}
+  .greeting{font-weight:700; text-align:center; margin:4px 0 14px;}
+  .list-title{
+    text-align:center; font-weight:700; font-size:18px;
+    text-decoration:underline; margin:0 0 8px;
+  }
+  .subject{
+    text-align:center; font-weight:700; font-size:19px; margin:4px 0 22px;
+  }
+
+  /* ---------- inline editable inputs ---------- */
+  input.inline-input, textarea.inline-input{
+    font-family:inherit;
+    border:none;
+    background:transparent;
+    color:inherit;
+    font-weight:inherit;
+    font-size:inherit;
+    border-bottom:1px dotted var(--muted);
+    padding:0 4px;
+  }
+  input.inline-input:focus, textarea.inline-input:focus{
+    outline:none;
+    border-bottom:1px solid var(--stamp);
+    background:rgba(156,43,43,.06);
+  }
+  .inline-input.small{width:70px; text-align:center;}
+  .inline-input.wide{width:280px;}
+  .inline-input.full{width:100%; text-align:center; font-size:19px; font-weight:700;}
+  #dateInput{width:150px; text-align:center; font-weight:700;}
+
+  /* ---------- table ---------- */
+  table.items{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:6px;
+    font-size:14.5px;
+  }
+  table.items th{
+    background:var(--ink);
+    color:#F3EDDD;
+    font-family:'Amiri', serif;
+    font-weight:700;
+    font-size:16px;
+    padding:10px 8px;
+    border:1px solid var(--ink);
+  }
+  table.items td{
+    border:1px solid var(--line);
+    padding:7px 10px;
+    vertical-align:middle;
+  }
+  table.items tbody tr:nth-child(even){background:rgba(169,130,47,.06);}
+  td.amount-cell{text-align:center; direction:ltr;}
+  td input.row-desc{
+    border:none; background:transparent; width:100%;
+    font-family:inherit; font-size:inherit; color:inherit;
+    padding:2px 4px;
+  }
+  td input.row-amount{
+    border:none; background:transparent; width:100%;
+    font-family:inherit; font-size:inherit; color:inherit;
+    text-align:center; padding:2px 4px; font-weight:600;
+  }
+  td input.row-desc:focus, td input.row-amount:focus{
+    outline:none; background:rgba(156,43,43,.08); border-radius:2px;
+  }
+  td.del-cell{
+    width:38px; text-align:center; padding:4px; border:none; background:transparent;
+  }
+  button.del-btn{
+    border:1px solid var(--stamp);
+    color:var(--stamp);
+    background:transparent;
+    width:24px; height:24px;
+    border-radius:50%;
+    font-size:14px; line-height:1;
+    cursor:pointer;
+  }
+  button.del-btn:hover{background:var(--stamp); color:#fff;}
+
+  tfoot .total-row td{
+    border:none;
+    border-top:3px double var(--ink);
+    font-weight:700;
+    font-size:17px;
+    padding:12px 10px;
+  }
+  tfoot .total-row td:first-child{
+    background:var(--ink);
+    color:#F3EDDD;
+    text-align:center;
+    font-family:'Amiri', serif;
+    font-size:18px;
+    border-top:3px double var(--ink);
+  }
+  .currency-tag{font-weight:700; color:var(--brass); margin-left:6px; direction:ltr;}
+  .total-input{
+    border:none; background:transparent; text-align:center;
+    font-family:inherit; font-weight:700; font-size:17px; color:var(--ink);
+    width:70%; direction:ltr;
+  }
+  .total-input:focus{outline:none; background:rgba(156,43,43,.08); border-radius:2px;}
+  button#btnLock{
+    border:none; background:transparent; cursor:pointer; font-size:16px;
+  }
+
+  .words-line{
+    margin-top:24px;
+    font-weight:700;
+    text-align:center;
+    font-size:15.5px;
+    line-height:1.9;
+  }
+  .words-editable{
+    outline:none;
+    border-bottom:1px dotted transparent;
+  }
+  .words-editable:focus{
+    border-bottom:1px dotted var(--stamp);
+    background:rgba(156,43,43,.06);
+  }
+
+  .no-print{}
+
+  footer.hint{
+    max-width:900px; margin:14px auto 0; text-align:center;
+    font-size:12px; color:var(--ink-soft); opacity:.75;
+  }
+
+  @media print{
+    body{background:#fff; padding:0;}
+    .toolbar, footer.hint{display:none;}
+    .sheet{box-shadow:none;}
+  }
+
+  @media (max-width: 640px){
+    .sheet{padding:26px 18px 34px;}
+    header.letterhead h1{font-size:20px;}
+    .subject{font-size:16px;}
+    table.items{font-size:12.5px;}
+    .inline-input.wide{width:160px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="toolbar no-print">
+    <button id="btnAddRow">＋ إضافة بند</button>
+    <button id="btnSetDate">تعيين تاريخ اليوم</button>
+    <button id="btnRecalc">↺ إعادة الحساب التلقائي</button>
+    <button id="btnNew">قائمة جديدة</button>
+    <span class="spacer"></span>
+    <span class="status" id="statusText">يُحفظ تلقائياً في هذا المتصفح</span>
+    <button id="btnPdf" class="primary">⭳ حفظ PDF</button>
+  </div>
+
+  <div class="sheet" id="sheet">
+    <header class="letterhead">
+      <p class="bismillah" contenteditable="true">بسم الله الرحمن الرحيم</p>
+      <h1 contenteditable="true">الغالي الحاج لخدمات التخليص والترحيل</h1>
+      <p class="addr" contenteditable="true">بورتسودان – عمارة موسى الطابق الأول – شقة رقم 31</p>
+      <p class="phones" contenteditable="true">ت: 0129925333 – 0912341022</p>
+      <p class="email">Email: <strong contenteditable="true">algalyalhaj24@gmail.com</strong></p>
+    </header>
+
+    <div class="rule"></div>
+
+    <section class="meta">
+      <p class="meta-row"><label>التاريخ: </label><input type="text" id="dateInput" class="inline-input" placeholder="٢٠٢٦/٠١/٠١م"></p>
+      <p class="salute">السيد/ <input type="text" id="clientName" class="inline-input wide" placeholder="اسم العميل أو الجهة"></p>
+      <p class="honor">المحترم</p>
+      <p class="greeting">تحية طيبة</p>
+      <p class="list-title">قائمة صرف رقم (( <input type="text" id="listNumber" class="inline-input small" placeholder="—"> ))</p>
+      <p class="subject"><input type="text" id="subjectLine" class="inline-input full" placeholder="عن تخليص وارسال ..."></p>
+    </section>
+
+    <table class="items">
+      <colgroup>
+        <col style="width:58%">
+        <col style="width:34%">
+        <col style="width:38px">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>البيـــــــــــــــــــــــان</th>
+          <th>جنيه سوداني</th>
+          <th class="no-print"></th>
+        </tr>
+      </thead>
+      <tbody id="rowsBody"></tbody>
+      <tfoot>
+        <tr class="total-row">
+          <td>الجملـــــــــــــــــة</td>
+          <td class="amount-cell">
+            <span class="currency-tag">SDG</span><input type="text" id="totalInput" class="total-input" value="0.00">
+          </td>
+          <td class="no-print"><button id="btnLock" title="تبديل بين الحساب التلقائي واليدوي">🔒</button></td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <p class="words-line">((<span id="wordsText" contenteditable="true" class="words-editable"></span>))</p>
+  </div>
+
+  <footer class="hint no-print">التاريخ ورقم القائمة والبنود قابلة للتعديل مباشرة على الصفحة. الإجمالي يُحسب تلقائياً ويمكن كتابته يدوياً عند الحاجة.</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var rowsBody   = document.getElementById('rowsBody');
+  var totalInput = document.getElementById('totalInput');
+  var wordsText  = document.getElementById('wordsText');
+  var btnLock    = document.getElementById('btnLock');
+  var dateInput  = document.getElementById('dateInput');
+  var statusText = document.getElementById('statusText');
+
+  var isAuto = true;
+
+  var DEFAULT_ROWS = [
+    ["إذن تسليم رقم", ""],
+    ["نقل الحاوية للكشف", ""],
+    ["شهادة جمركية رقم", ""],
+    ["رسوم جمركية الايصال رقم", ""],
+    ["فاتورة الموانئ رقم", ""],
+    ["فورمات باب اشراف حركة عربات", ""],
+    ["ارضيات الشركة ايصال رقم", ""],
+    ["عمال كشف", ""],
+    ["نقل خاص للكشف", ""],
+    ["إجراء بالتعريفة خاص", ""],
+    ["رسوم جودة الإيصال رقم", ""],
+    ["رسوم الدمغة الولائية", ""],
+    ["طباعة وتصوير مستندات", ""],
+    ["ترحيل كشاف", ""],
+    ["منصرفات متنوعة", ""],
+    ["عمولة", ""]
+  ];
+
+  /* ---------------- Arabic number-to-words ---------------- */
+  function groupToWords(num){
+    var ones=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة'];
+    var teens=['عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+    var tens=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+    var hundreds=['','مائة','مئتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+    var parts=[];
+    var h=Math.floor(num/100), r=num%100;
+    if(h>0) parts.push(hundreds[h]);
+    if(r>0){
+      if(r<10) parts.push(ones[r]);
+      else if(r<20) parts.push(teens[r-10]);
+      else{
+        var t=Math.floor(r/10), o=r%10;
+        parts.push(o>0 ? (ones[o]+' و'+tens[t]) : tens[t]);
+      }
+    }
+    return parts.join(' و');
+  }
+  function scaleWord(num, scale){
+    if(!scale) return groupToWords(num);
+    if(num===1) return scale.sing;
+    if(num===2) return scale.dual;
+    if(num>=3 && num<=10) return groupToWords(num)+' '+scale.plur;
+    return groupToWords(num)+' '+scale.sing;
+  }
+  function integerToWords(n){
+    if(n===0) return 'صفر';
+    var scaleDefs=[null,
+      {sing:'ألف',dual:'ألفان',plur:'آلاف'},
+      {sing:'مليون',dual:'مليونان',plur:'ملايين'},
+      {sing:'مليار',dual:'ملياران',plur:'مليارات'},
+      {sing:'تريليون',dual:'تريليونان',plur:'تريليونات'}];
+    var groups=[], x=n;
+    while(x>0){ groups.push(x%1000); x=Math.floor(x/1000); }
+    var words=[];
+    for(var i=groups.length-1;i>=0;i--){
+      if(groups[i]>0) words.push(scaleWord(groups[i], scaleDefs[i]));
+    }
+    return words.join(' و');
+  }
+  function amountToWords(amount){
+    amount = Math.round((amount||0)*100)/100;
+    var intPart = Math.floor(amount);
+    var fracPart = Math.round((amount-intPart)*100);
+    var result = integerToWords(intPart);
+    var currencyWord;
+    if(intPart===1) currencyWord='جنيه سوداني';
+    else if(intPart===2) currencyWord='جنيهان سودانيان';
+    else if(intPart>=3 && intPart<=10) currencyWord='جنيهات سودانية';
+    else currencyWord='جنيه سوداني';
+    result += ' '+currencyWord;
+    if(fracPart>0){
+      var fracWords = integerToWords(fracPart);
+      var qirshWord;
+      if(fracPart===1) qirshWord='قرش';
+      else if(fracPart===2) qirshWord='قرشان';
+      else if(fracPart>=3 && fracPart<=10) qirshWord='قروش';
+      else qirshWord='قرشاً';
+      result += ' و'+fracWords+' '+qirshWord;
+    }
+    result += ' فقط لاغير';
+    return result;
+  }
+
+  /* ---------------- rows ---------------- */
+  function addRow(desc, amount){
+    var tr = document.createElement('tr');
+
+    var tdDesc = document.createElement('td');
+    var inDesc = document.createElement('input');
+    inDesc.type='text'; inDesc.className='row-desc'; inDesc.value = desc||'';
+    inDesc.addEventListener('input', saveState);
+    tdDesc.appendChild(inDesc);
+
+    var tdAmt = document.createElement('td');
+    tdAmt.className='amount-cell';
+    var inAmt = document.createElement('input');
+    inAmt.type='number'; inAmt.step='0.01'; inAmt.className='row-amount';
+    inAmt.value = (amount!==undefined && amount!=='') ? amount : '';
+    inAmt.addEventListener('input', function(){ recalcTotal(); saveState(); });
+    tdAmt.appendChild(inAmt);
+
+    var tdDel = document.createElement('td');
+    tdDel.className='del-cell no-print';
+    var btnDel = document.createElement('button');
+    btnDel.type='button'; btnDel.className='del-btn'; btnDel.title='حذف البند';
+    btnDel.textContent='×';
+    btnDel.addEventListener('click', function(){
+      tr.remove();
+      recalcTotal();
+      saveState();
+    });
+    tdDel.appendChild(btnDel);
+
+    tr.appendChild(tdDesc);
+    tr.appendChild(tdAmt);
+    tr.appendChild(tdDel);
+    rowsBody.appendChild(tr);
+  }
+
+  function loadDefaultRows(){
+    rowsBody.innerHTML='';
+    DEFAULT_ROWS.forEach(function(r){ addRow(r[0], r[1]); });
+  }
+
+  function formatNumber(n){
+    if(isNaN(n)) n = 0;
+    return n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function parseNumber(str){
+    var n = parseFloat(String(str).replace(/,/g,''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  function recalcTotal(force){
+    if(!isAuto && !force) return;
+    var sum = 0;
+    document.querySelectorAll('.row-amount').forEach(function(inp){
+      sum += parseNumber(inp.value);
+    });
+    setAuto(true);
+    totalInput.value = formatNumber(sum);
+    wordsText.textContent = amountToWords(sum);
+  }
+
+  function setAuto(state){
+    isAuto = state;
+    btnLock.textContent = isAuto ? '🔒' : '🔓';
+    btnLock.title = isAuto ? 'الإجمالي تلقائي — اضغط للتحويل إلى يدوي' : 'الإجمالي يدوي — اضغط لإعادة الحساب التلقائي';
+  }
+
+  totalInput.addEventListener('input', function(){
+    setAuto(false);
+    wordsText.textContent = amountToWords(parseNumber(totalInput.value));
+    saveState();
+  });
+  totalInput.addEventListener('blur', function(){
+    totalInput.value = formatNumber(parseNumber(totalInput.value));
+  });
+
+  btnLock.addEventListener('click', function(){
+    if(isAuto){ setAuto(false); }
+    else { recalcTotal(true); }
+    saveState();
+  });
+
+  document.getElementById('btnAddRow').addEventListener('click', function(){
+    addRow('', '');
+    saveState();
+  });
+
+  document.getElementById('btnRecalc').addEventListener('click', function(){
+    recalcTotal(true);
+    saveState();
+  });
+
+  document.getElementById('btnSetDate').addEventListener('click', function(){
+    var d = new Date();
+    var y = d.getFullYear();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var day = String(d.getDate()).padStart(2,'0');
+    dateInput.value = y+'/'+m+'/'+day+'م';
+    saveState();
+  });
+
+  document.getElementById('btnNew').addEventListener('click', function(){
+    if(!confirm('بدء قائمة جديدة سيمسح رقم القائمة، اسم العميل، الوصف، وكل البنود الحالية. متابعة؟')) return;
+    document.getElementById('clientName').value='';
+    document.getElementById('listNumber').value='';
+    document.getElementById('subjectLine').value='';
+    loadDefaultRows();
+    document.getElementById('btnSetDate').click();
+    recalcTotal(true);
+    saveState();
+  });
+
+  document.getElementById('btnPdf').addEventListener('click', function(){
+    var sheet = document.getElementById('sheet');
+    var listNo = document.getElementById('listNumber').value.trim();
+    var dateVal = dateInput.value.replace(/[^\d]/g,'-').replace(/^-|-$/g,'');
+    var filename = 'قائمة_صرف' + (listNo ? ('_'+listNo) : '') + (dateVal ? ('_'+dateVal) : '') + '.pdf';
+    var opt = {
+      margin: 0,
+      filename: filename,
+      image: { type:'jpeg', quality:0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        ignoreElements: function(el){ return el.classList && el.classList.contains('no-print'); }
+      },
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+    };
+    html2pdf().set(opt).from(sheet).save();
+  });
+
+  /* ---------------- persistence ---------------- */
+  var STORAGE_KEY = 'algaly_disbursement_list_v1';
+
+  function collectState(){
+    return {
+      company: {
+        bismillah: document.querySelector('.bismillah').textContent,
+        name: document.querySelector('header.letterhead h1').textContent,
+        addr: document.querySelector('.addr').textContent,
+        phones: document.querySelector('.phones').textContent,
+        email: document.querySelector('.email strong').textContent
+      },
+      date: dateInput.value,
+      client: document.getElementById('clientName').value,
+      listNumber: document.getElementById('listNumber').value,
+      subject: document.getElementById('subjectLine').value,
+      rows: Array.from(document.querySelectorAll('#rowsBody tr')).map(function(tr){
+        return [tr.querySelector('.row-desc').value, tr.querySelector('.row-amount').value];
+      }),
+      total: totalInput.value,
+      isAuto: isAuto,
+      words: wordsText.textContent
+    };
+  }
+
+  function saveState(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectState()));
+      statusText.textContent = 'محفوظ تلقائياً — ' + new Date().toLocaleTimeString('ar-EG');
+    }catch(e){ /* storage unavailable, ignore */ }
+  }
+
+  function restoreState(){
+    var raw;
+    try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){ raw = null; }
+    if(!raw){
+      loadDefaultRows();
+      document.getElementById('btnSetDate').click();
+      recalcTotal(true);
+      return;
+    }
+    var s;
+    try{ s = JSON.parse(raw); }catch(e){ s = null; }
+    if(!s){ loadDefaultRows(); return; }
+
+    if(s.company){
+      document.querySelector('.bismillah').textContent = s.company.bismillah || '';
+      document.querySelector('header.letterhead h1').textContent = s.company.name || '';
+      document.querySelector('.addr').textContent = s.company.addr || '';
+      document.querySelector('.phones').textContent = s.company.phones || '';
+      document.querySelector('.email strong').textContent = s.company.email || '';
+    }
+    dateInput.value = s.date || '';
+    document.getElementById('clientName').value = s.client || '';
+    document.getElementById('listNumber').value = s.listNumber || '';
+    document.getElementById('subjectLine').value = s.subject || '';
+
+    rowsBody.innerHTML='';
+    (s.rows && s.rows.length ? s.rows : DEFAULT_ROWS).forEach(function(r){ addRow(r[0], r[1]); });
+
+    setAuto(s.isAuto !== undefined ? s.isAuto : true);
+    totalInput.value = s.total || '0.00';
+    wordsText.textContent = s.words || '';
+    if(isAuto) recalcTotal(true);
+  }
+
+  // save on any edit anywhere in the sheet
+  document.getElementById('sheet').addEventListener('input', saveState);
+  document.getElementById('sheet').addEventListener('blur', saveState, true);
+
+  restoreState();
+})();
+</script>
+</body>
+</html>
